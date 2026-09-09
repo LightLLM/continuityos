@@ -2,6 +2,7 @@
 import json
 import os
 from http.server import BaseHTTPRequestHandler
+from pathlib import Path
 
 import httpx
 
@@ -61,6 +62,14 @@ async def investigate():
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
+        if self.path.split("?", 1)[0] in ("/", "/index.html"):
+            page = (Path(__file__).parent.parent / "index.html").read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Cache-Control", "public, max-age=0, must-revalidate")
+            self.end_headers()
+            self.wfile.write(page)
+            return
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
